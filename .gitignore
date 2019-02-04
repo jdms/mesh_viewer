@@ -4,6 +4,7 @@
 
 *build/
 doc/html
+src/tucanow/.gitignore
 
 
 ###################
