@@ -14,17 +14,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # External libraries
 ###############################################
 
-find_package(OpenGL REQUIRED)
-link_libraries(${OPENGL_LIBRARIES})
-
-# GLEW is required by Tucano
-find_package(GLEW REQUIRED)
-include_directories(${GLEW_INCLUDE_DIRS})
-link_libraries(${GLEW_LIBRARIES})
-
-# Eigen3 is required by Tucano
-find_package(Eigen3 REQUIRED)
-include_directories(${EIGEN3_INCLUDE_DIRS})
+add_subdirectory(${CMAKE_SOURCE_DIR}/src/tucanow)
 
 
 ###############################################
@@ -37,56 +27,43 @@ include_directories(${EIGEN3_INCLUDE_DIRS})
 find_package(PkgConfig REQUIRED)
 
 pkg_search_module(GLFW REQUIRED glfw3)
-include_directories(${GLFW_INCLUDE_DIRS})
+# include_directories(${GLFW_INCLUDE_DIRS})
 
 # What do we have, static or dynamic libraries?
 if(NOT GLFW_LIBRARIES)
     set(GLFW_LIBRARIES ${GLFW_STATIC_LIBRARIES})
 endif()
-link_libraries(${GLFW_LIBRARIES})
+# link_libraries(${GLFW_LIBRARIES})
 
 
 ###############################################
 # Include project's files and build binary
 ###############################################
 
-set(CMAKE_CXX_FLAGS 
-    "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -ggdb3") 
+# Don't touch CMAKE_CXX_FLAGS!
+# set(CMAKE_CXX_FLAGS 
+#     "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -ggdb3") 
 
 set(MESH_VIEWER_DIR "${CMAKE_SOURCE_DIR}") 
 
-include_directories(${MESH_VIEWER_DIR}/include)
-include_directories(${MESH_VIEWER_DIR}/src)
-include_directories(SYSTEM ${MESH_VIEWER_DIR}/src/tucano)
-
 set(MESH_VIEWER_SOURCES
     ${MESH_VIEWER_DIR}/src/main_window.cpp
-    ${MESH_VIEWER_DIR}/src/scene.cpp
-    ${MESH_VIEWER_DIR}/src/gui.cpp
   )
 
-add_executable(mesh_viewer ${MESH_VIEWER_SOURCES} ${MESH_VIEWER_DIR}/src/main_load_ply.cpp)
-add_executable(mesh_viewer_spheres ${MESH_VIEWER_SOURCES} ${MESH_VIEWER_DIR}/src/main_spheres.cpp)
-
+add_executable(mesh_viewer ${MESH_VIEWER_SOURCES} ${MESH_VIEWER_DIR}/src/main.cpp)
+target_compile_features(mesh_viewer PUBLIC cxx_std_11)
+target_include_directories(mesh_viewer 
+    PUBLIC "${CMAKE_SOURCE_DIR}/include"
+    PRIVATE "${GLFW_INCLUDE_DIRS}"
+)
+target_link_libraries(mesh_viewer ${GLFW_LIBRARIES} tucanow::tucanow)
 
 ###############################################
-# Copy shaders and assets to binary dir when done
+# Copy models to binary dir when done
 ###############################################
 
 add_custom_command(TARGET mesh_viewer POST_BUILD 
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${MESH_VIEWER_DIR}/src/tucano/tucano/effects/shaders 
-        ${CMAKE_CURRENT_BINARY_DIR}/shaders 
-  )
-
-add_custom_command(TARGET mesh_viewer POST_BUILD 
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${MESH_VIEWER_DIR}/src/tucano/samples/assets
-        ${CMAKE_CURRENT_BINARY_DIR}/samples/assets
-  )
-
-add_custom_command(TARGET mesh_viewer POST_BUILD 
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${MESH_VIEWER_DIR}/src/tucano/samples/models
+    ${MESH_VIEWER_DIR}/samples/models
         ${CMAKE_CURRENT_BINARY_DIR}/samples/models
   )
