@@ -1,0 +1,146 @@
+###############################################
+# Preamble  
+###############################################
+
+cmake_minimum_required(VERSION 3.10)
+
+project(MeshViewer)
+
+# For vim's YouCompleteMe plugin
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+
+###############################################
+# Set build type (debug, release, etc.)
+###############################################
+
+# If empty will use the system's default build type
+
+set(TUCANOW_BUILD_TYPE "" CACHE STRING
+    "Set build type to: Debug, Release, RelWithDebInfo, MinSizeRel, or leave empty")
+
+if(TUCANOW_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "${TUCANOW_BUILD_TYPE}" CACHE INTERNAL "" FORCE)
+endif()
+
+
+###############################################
+# Project options 
+###############################################
+
+option(TUCANOW_BUILD_SHARED_LIBRARY "Build tucanow as a shared library" ON)
+
+if(TUCANOW_BUILD_SHARED_LIBRARY)
+    set(TUCANOW_LIBRARY_TYPE "SHARED")
+
+    # Never have problems using dlls again!
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+else()
+    set(TUCANOW_LIBRARY_TYPE "STATIC")
+endif()
+
+
+###############################################
+# External libraries
+###############################################
+
+find_package(OpenGL REQUIRED)
+
+# GLEW is required by Tucano
+find_package(GLEW REQUIRED)
+
+# Eigen3 is required by Tucano
+find_package(Eigen3 REQUIRED)
+
+
+###############################################
+# Create library
+###############################################
+
+
+set(TUCANOW_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/scene.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/gui.cpp
+)
+
+add_library(tucanow ${TUCANOW_LIBRARY_TYPE} ${TUCANOW_SOURCES})
+
+target_include_directories(tucanow
+    PUBLIC
+        $<INSTALL_INTERFACE:include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
+target_include_directories(tucanow SYSTEM
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/tucano
+)
+
+target_link_libraries(tucanow GLEW::GLEW OpenGL::GL Eigen3::Eigen)
+
+target_compile_features(tucanow PUBLIC cxx_std_11)
+
+# MSVC (as recently as version 19.15.26729) throws hundreds of warnings from
+# it's own implementation of the STL -- CMake's SYSTEM directive seems
+# ineffective to prevent this behaviour.  Thus, using -Wall in MSVC is,
+# unfortunately, not possible.  
+
+if(NOT MSVC) 
+    target_compile_options(tucanow PRIVATE -Wall) 
+endif()
+
+# add_executable(mesh_viewer ${MESH_VIEWER_SOURCES} ${MESH_VIEWER_DIR}/src/main_load_ply.cpp)
+# add_executable(mesh_viewer_spheres ${MESH_VIEWER_SOURCES} ${MESH_VIEWER_DIR}/src/main_spheres.cpp)
+
+
+###############################################
+# Copy shaders and assets to binary dir when done
+###############################################
+
+add_custom_command(TARGET tucanow POST_BUILD 
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/tucano/tucano/effects/shaders 
+        ${CMAKE_BINARY_DIR}/shaders
+)
+
+add_custom_command(TARGET tucanow POST_BUILD 
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/tucano/samples/assets
+        ${CMAKE_BINARY_DIR}/samples/assets
+)
+
+
+###############################################
+# Set install and export CMake targets
+###############################################
+
+# Must use GNUInstallDirs to install libraries into correct
+# locations on all platforms.
+
+include(GNUInstallDirs)
+
+# Modify installation path in cmake generation step by setting var: 
+# CMAKE_INSTALL_PREFIX
+
+install(TARGETS tucanow 
+    EXPORT tucanow-export
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    COMPONENT tucanow
+)
+
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include"
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(EXPORT tucanow-export 
+    FILE tucanow-targets.cmake
+    NAMESPACE tucanow::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/tucanow
+)
+add_library(tucanow::tucanow ALIAS tucanow)
+
+# export(TARGETS tucanow FILE tucanow.cmake)
