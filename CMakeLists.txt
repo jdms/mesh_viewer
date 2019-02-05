@@ -33,7 +33,7 @@ set_target_properties(tucanow PROPERTIES
 ###############################################
 
 if(WIN32)
-    add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/win32-glfw3")
+    add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/win32-libs")
 
 else()
     # As per its docs, glfw3 requires the use of 
