@@ -1,5 +1,5 @@
 ###############################################
-# Preamble  
+# Preamble
 ###############################################
 
 cmake_minimum_required(VERSION 3.0)
@@ -16,24 +16,40 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/src/tucanow)
 
+# The following is only necessary if building 
+# tucanow as a dll in windows
+
+set_target_properties(tucanow PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+)
+
+set_target_properties(tucanow PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+)
+
 
 ###############################################
-# Making glfw3 work is more fun! 
+# Making glfw3 work is more fun!
 ###############################################
 
-# As per its docs, glfw3 requires the use of 
-# pkg-config (see `man pkg-config`)
+if(WIN32)
+    add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/win32-glfw3")
 
-find_package(PkgConfig REQUIRED)
+else()
+    # As per its docs, glfw3 requires the use of 
+    # pkg-config (see `man pkg-config`)
 
-pkg_search_module(GLFW REQUIRED glfw3)
-# include_directories(${GLFW_INCLUDE_DIRS})
+    find_package(PkgConfig REQUIRED)
 
-# What do we have, static or dynamic libraries?
-if(NOT GLFW_LIBRARIES)
-    set(GLFW_LIBRARIES ${GLFW_STATIC_LIBRARIES})
+    pkg_search_module(GLFW REQUIRED glfw3)
+    # include_directories(${GLFW_INCLUDE_DIRS})
+
+    # What do we have, static or dynamic libraries?
+    if(NOT GLFW_LIBRARIES)
+        set(GLFW_LIBRARIES ${GLFW_STATIC_LIBRARIES})
+    endif()
+    # link_libraries(${GLFW_LIBRARIES})
 endif()
-# link_libraries(${GLFW_LIBRARIES})
 
 
 ###############################################
@@ -42,7 +58,7 @@ endif()
 
 # Don't touch CMAKE_CXX_FLAGS!
 # set(CMAKE_CXX_FLAGS 
-#     "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -ggdb3") 
+#     "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -ggdb3")
 
 add_executable(mesh_viewer
     ${CMAKE_SOURCE_DIR}/src/main_window.cpp
@@ -53,7 +69,7 @@ target_include_directories(mesh_viewer
     PUBLIC "${CMAKE_SOURCE_DIR}/include"
     PRIVATE "${GLFW_INCLUDE_DIRS}"
 )
-target_link_libraries(mesh_viewer ${GLFW_LIBRARIES} tucanow::tucanow)
+target_link_libraries(mesh_viewer ${GLFW_LIBRARIES} tucanow)
 
 ###############################################
 # Copy models to binary dir when done
