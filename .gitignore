@@ -5,6 +5,9 @@
 *build/
 doc/html
 src/tucanow/.gitignore
+win32-glfw3/glfw*
+src/win32-libs/eigen*
+src/win32-libs/glew*
 
 
 ###################
