@@ -8,9 +8,9 @@
 
 #include "main_window.hpp"
 #include "widget_data.hpp"
-#include "scene.hpp"
-#include "gui.hpp"
-#include "misc.hpp"
+#include "tucanow/scene.hpp"
+#include "tucanow/gui.hpp"
+#include "tucanow/misc.hpp"
 
 
 GLFWwindow* MainWindow::main_window = nullptr;
