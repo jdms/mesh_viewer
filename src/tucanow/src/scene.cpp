@@ -1,6 +1,6 @@
 #include "scene_impl.hpp"
 #include "tucanow/scene.hpp"
-#include "tucanow_misc.hpp"
+/* #include "tucanow/misc.hpp" */
 
 
 namespace tucanow {
@@ -9,7 +9,7 @@ namespace tucanow {
 Scene::Scene() //: pimpl(new SceneImpl)
 {
     // Glew must be initialized before any Tucano object is created
-    misc::initGlew();
+    /* misc::initGlew(); */
 
     pimpl.reset(new SceneImpl);
 

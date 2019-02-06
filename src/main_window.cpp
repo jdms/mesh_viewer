@@ -6,6 +6,7 @@
 #include "widget_data.hpp"
 #include "tucanow/scene.hpp"
 #include "tucanow/gui.hpp"
+#include "tucanow/misc.hpp"
 
 
 GLFWwindow* MainWindow::main_window = nullptr;
@@ -115,8 +116,8 @@ bool MainWindow::setAssetsDir(std::string dirname)
 
 void MainWindow::initialize (int width, int height, WidgetData &data)
 {
-    /* Glew is automatically initialized in class Scene */
-    /* tucanow::misc::initGlew(); */
+    /* Glew must be initialized before any tucanow object is created */
+    tucanow::misc::initGlew();
 
     pscene.reset( new tucanow::Scene() );
     pgui.reset( new tucanow::Gui( *pscene ) );
