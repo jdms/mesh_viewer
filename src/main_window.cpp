@@ -1,16 +1,11 @@
 #include <iostream>
 
-/* Must include Tucano before GLFW or else gets 'gl.h' included before 'glew.h' error */
-/* #include <tucano/tucano.hpp> */
-#include <GL/glew.h>
-
 #include "GLFW/glfw3.h"
 
 #include "main_window.hpp"
 #include "widget_data.hpp"
 #include "tucanow/scene.hpp"
 #include "tucanow/gui.hpp"
-#include "tucanow/misc.hpp"
 
 
 GLFWwindow* MainWindow::main_window = nullptr;
@@ -120,9 +115,9 @@ bool MainWindow::setAssetsDir(std::string dirname)
 
 void MainWindow::initialize (int width, int height, WidgetData &data)
 {
-    /* Tucano::Misc::initGlew(); */
-    tucanow::misc::initGlew();
-    
+    /* Glew is automatically initialized in class Scene */
+    /* tucanow::misc::initGlew(); */
+
     pscene.reset( new tucanow::Scene() );
     pgui.reset( new tucanow::Gui( *pscene ) );
 

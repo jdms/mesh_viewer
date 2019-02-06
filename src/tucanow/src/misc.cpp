@@ -2,7 +2,7 @@
 
 #include <GL/glew.h>
 
-#include "tucanow/misc.hpp"
+#include "tucanow_misc.hpp"
 
 
 namespace tucanow {
@@ -11,12 +11,18 @@ namespace misc {
 
 void initGlew()
 {
-    glewExperimental = true;
-    GLenum glewInitResult = glewInit();
-    if (GLEW_OK != glewInitResult)
+    static bool first_run = true;
+    if (first_run)
     {
-        std::cerr << "Error: " << glewGetErrorString(glewInitResult) << std::endl;
-        exit(EXIT_FAILURE);
+        glewExperimental = true;
+        GLenum glewInitResult = glewInit();
+        if (GLEW_OK != glewInitResult)
+        {
+            std::cerr << "\nError: " << glewGetErrorString(glewInitResult) << std::endl << std::flush;
+            exit(EXIT_FAILURE);
+        }
+
+        first_run = false;
     }
 }
 
