@@ -2,7 +2,7 @@
 #include <vector>
 
 #include "main_window.hpp"
-#include "sphere.hpp"
+#include "tucanow/sphere.hpp"
 
 
 int main()
