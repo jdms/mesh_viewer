@@ -144,6 +144,7 @@ void MainWindow::initialize (int width, int height, WidgetData &data)
     std::cout << " Right mouse button  : translate trackball"        << std::endl;
     std::cout << " Middle mouse button : change light direction"     << std::endl;
     std::cout << std::endl;
+    std::cout << " W : render wireframe                            " << std::endl;
     std::cout << " H : alternate between headlight and fixed light " << std::endl;
     std::cout << " R : reset trackball and light direction"          << std::endl;
     std::cout << " *********************************************** " << std::endl;
@@ -165,6 +166,11 @@ void MainWindow::keyCallback(GLFWwindow* window, int key, int scancode, int acti
     if (key == GLFW_KEY_H && action == GLFW_PRESS)
     {
         pscene->toggleHeadlight();
+    }
+
+    if (key == GLFW_KEY_W && action == GLFW_PRESS)
+    {
+        pscene->toggleRenderWireframe();
     }
 }
 
