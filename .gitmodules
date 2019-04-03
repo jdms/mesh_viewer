@@ -1,0 +1,3 @@
+[submodule "src/tucanow"]
+	path = src/tucanow
+	url = git@bitbucket.org:jdms/tucanow.git
