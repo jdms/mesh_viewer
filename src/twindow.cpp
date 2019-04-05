@@ -1,5 +1,10 @@
 #include <iostream>
 
+// Add missing OpenGL extensions in Windows
+#if defined(_WIN32)
+    #include <GL/glew.h>
+#endif
+
 #include "GLFW/glfw3.h"
 
 #include "twindow.hpp"
@@ -56,6 +61,8 @@ TWindow* TWindow::Get(int width, int height, std::string title)
     }
 
     glfwMakeContextCurrent(main_window);
+
+    std::cout << "*** Diagnostics:" << std::endl;
 
     const GLubyte* openGLRenderer = glGetString(GL_RENDERER);
     const GLubyte* openGLVersion = glGetString(GL_VERSION);
