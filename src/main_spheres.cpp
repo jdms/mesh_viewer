@@ -34,15 +34,16 @@ int main()
     // Load meshes into scene
     auto scene = main_window->getScene();
 
-    std::array<float, 3> bbox_origin = {.0f, .0f, .0f};
-    std::array<float, 3> bbox_size = {1.0f, 1.0f, 1.0f};
+    std::array<float, 3> bbox_origin = {-1.f, -1.f, -1.f};
+    std::array<float, 3> bbox_size = {2.f, 2.f, 2.f};
     scene->setBoundingBox(bbox_origin, bbox_size);
     scene->focusCameraOnBoundingBox();
 
-    scene->loadMesh(1, vertices1, triangles1, normals1);
+    scene->loadTriangleMesh(1, vertices1, triangles1, normals1);
     scene->setObjectColor(1, 1.0f, 0.f, 0.f);
 
-    scene->loadMesh(2, vertices2, triangles2, normals2);
+    /* scene->loadPointCloud(2, vertices2); */
+    scene->loadTriangleMesh(2, vertices2, triangles2, normals2);
     scene->setObjectColor(2, 0.f, 0.f, 1.0f);
 
 
