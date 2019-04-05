@@ -47,7 +47,7 @@ TWindow* TWindow::Get(int width, int height, std::string title)
     }
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_SAMPLES, 8);
@@ -62,18 +62,18 @@ TWindow* TWindow::Get(int width, int height, std::string title)
 
     glfwMakeContextCurrent(main_window);
 
+    std::cout << std::endl;
     std::cout << "*** Diagnostics:" << std::endl;
 
     const GLubyte* openGLRenderer = glGetString(GL_RENDERER);
     const GLubyte* openGLVersion = glGetString(GL_VERSION);
-    std::cout << std::endl;
-    std::cout << "Renderer: " << openGLRenderer << std::endl;
-    std::cout << "OpenGL version in use: " << openGLVersion << std::endl;
+    std::cout << "--> Renderer: " << openGLRenderer << std::endl;
+    std::cout << "--> OpenGL version in use: " << openGLVersion << std::endl;
 
     GLint bufs, samples;
     glGetIntegerv(GL_SAMPLE_BUFFERS, &bufs);
     glGetIntegerv(GL_SAMPLES, &samples);
-    std::cout << "MSAA: buffers = " << bufs << ", samples = " << samples << std::endl;
+    std::cout << "--> MSAA: buffers = " << bufs << ", samples = " << samples << std::endl;
 
     // macOS highdpi mode creates a framebuffer that differs from the window size
     int fb_width = 0;
