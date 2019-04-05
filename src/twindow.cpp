@@ -45,6 +45,7 @@ TWindow* TWindow::Get(int width, int height, std::string title)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_SAMPLES, 8);
 
     main_window = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
     if (main_window == nullptr)
@@ -61,6 +62,11 @@ TWindow* TWindow::Get(int width, int height, std::string title)
     std::cout << std::endl;
     std::cout << "Renderer: " << openGLRenderer << std::endl;
     std::cout << "OpenGL version in use: " << openGLVersion << std::endl;
+
+    GLint bufs, samples;
+    glGetIntegerv(GL_SAMPLE_BUFFERS, &bufs);
+    glGetIntegerv(GL_SAMPLES, &samples);
+    std::cout << "MSAA: buffers = " << bufs << ", samples = " << samples << std::endl;
 
     // macOS highdpi mode creates a framebuffer that differs from the window size
     int fb_width = 0;
@@ -369,6 +375,8 @@ int TWindow::run()
 {
     initializeGui(pdata_.get());
 
+    glEnable(GL_MULTISAMPLE);
+
     glfwSetKeyCallback(main_window, keyCallback); 
     glfwSetMouseButtonCallback(main_window, mouseButtonCallback); 
     glfwSetCursorPosCallback(main_window, cursorPosCallback); 
@@ -395,6 +403,8 @@ int TWindow::run()
 
         glfwPollEvents();
     }
+
+    glDisable(GL_MULTISAMPLE);
 
     return 0;
 }
