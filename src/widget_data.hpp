@@ -1,20 +1,15 @@
-#ifndef __TUCANOW_WIDGET_DATA__
-#define __TUCANOW_WIDGET_DATA__
+#ifndef TVIEWER_WIDGET_DATA
+#define TVIEWER_WIDGET_DATA
 
 #include <string>
-#include <vector>
 
 
 struct WidgetData 
 {
-    std::vector<float> vertices = {};
-    std::vector<unsigned int> triangles = {};
-    std::vector<float> normals = {};
-    std::vector<float> colors_rgb = {};
+    int scene_width_ = 0;
+    int scene_height_ = 0;
 
     std::string assets_dir_ = "./samples/assets/";
-    std::string model_filename_ = {};
-    bool mesh_is_initialized_ = false;
 };
 
 

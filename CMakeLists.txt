@@ -59,23 +59,43 @@ endif()
 # Don't touch CMAKE_CXX_FLAGS!
 # set(CMAKE_CXX_FLAGS 
 #     "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -ggdb3")
+add_library(twindow
+    ${CMAKE_SOURCE_DIR}/src/twindow.cpp
+)
 
-add_executable(mesh_viewer
-    ${CMAKE_SOURCE_DIR}/src/main_window.cpp
-    ${CMAKE_SOURCE_DIR}/src/main.cpp
+target_compile_features(twindow PUBLIC cxx_std_11)
+
+target_include_directories(twindow 
+    PUBLIC 
+        "${CMAKE_SOURCE_DIR}/include"
+    PRIVATE 
+        "${GLFW_INCLUDE_DIRS}"
 )
-target_compile_features(mesh_viewer PUBLIC cxx_std_11)
-target_include_directories(mesh_viewer 
-    PUBLIC "${CMAKE_SOURCE_DIR}/include"
-    PRIVATE "${GLFW_INCLUDE_DIRS}"
+
+target_link_libraries(twindow 
+    PUBLIC 
+        tucanow
+    PRIVATE
+        ${GLFW_LIBRARIES}
 )
-target_link_libraries(mesh_viewer ${GLFW_LIBRARIES} tucanow)
+
+add_executable(main_spheres
+    ${CMAKE_SOURCE_DIR}/src/main_spheres.cpp
+)
+
+target_link_libraries(main_spheres twindow)
+
+add_executable(main_ply
+    ${CMAKE_SOURCE_DIR}/src/main_ply.cpp
+)
+
+target_link_libraries(main_ply twindow)
 
 ###############################################
 # Copy models to binary dir when done
 ###############################################
 
-add_custom_command(TARGET mesh_viewer POST_BUILD 
+add_custom_command(TARGET twindow POST_BUILD 
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${CMAKE_SOURCE_DIR}/samples/models
         ${CMAKE_CURRENT_BINARY_DIR}/samples/models
