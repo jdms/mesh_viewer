@@ -217,7 +217,8 @@ void TWindow::initializeScene(WidgetData *data)
 
 void TWindow::initializeGui(WidgetData *data)
 {
-    pgui->initialize(data->scene_width_, data->scene_width_, data->assets_dir_);
+    if ( pgui )
+        pgui->initialize(data->scene_width_, data->scene_width_, data->assets_dir_);
 }
 
 void TWindow::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -225,7 +226,7 @@ void TWindow::keyCallback(GLFWwindow* window, int key, int scancode, int action,
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, 1);    
 
-    if ( pscene == nullptr )
+    if ( !pscene )
         return;
 
     if (key == GLFW_KEY_R && action == GLFW_PRESS)
@@ -246,7 +247,7 @@ void TWindow::keyCallback(GLFWwindow* window, int key, int scancode, int action,
 
 void TWindow::mouseButtonCallback (GLFWwindow* window, int button, int action, int mods)
 {
-    if( pscene == nullptr )
+    if( !pscene )
         return;
 
 /* <<<<<<< HEAD */
@@ -266,13 +267,15 @@ void TWindow::mouseButtonCallback (GLFWwindow* window, int button, int action, i
 
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
     {
-        if ( pgui->leftButtonPressed(xpos, ypos) )
-            return;
+        if ( pgui )
+            if ( pgui->leftButtonPressed(xpos, ypos) )
+                return;
     }
 
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
     {
-        pgui->leftButtonReleased(xpos, ypos);
+        if ( pgui )
+            pgui->leftButtonReleased(xpos, ypos);
     }
 /* >>>>>>> master */
 
@@ -309,8 +312,10 @@ void TWindow::mouseButtonCallback (GLFWwindow* window, int button, int action, i
 
 void TWindow::cursorPosCallback(GLFWwindow* window, double xpos, double ypos)
 {
-    if( pscene == nullptr )
+    if( !pscene )
+    {
         return;
+    }
 
 /* <<<<<<< HEAD */
     /* if ( pscene->getGUI()->cursorMove (xpos, ypos) ) */
@@ -318,6 +323,7 @@ void TWindow::cursorPosCallback(GLFWwindow* window, double xpos, double ypos)
     /*     return; */
     /* } */
 /* ======= */
+    if ( pgui )
     if ( pgui->cursorMove(xpos, ypos) )
     {
         return;
@@ -343,8 +349,10 @@ void TWindow::cursorPosCallback(GLFWwindow* window, double xpos, double ypos)
 
 void TWindow::scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    if( pscene == nullptr )
+    if( !pscene )
+    {
         return;
+    }
 
     if (yoffset > 0)
     {
@@ -358,11 +366,15 @@ void TWindow::scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 
 void TWindow::framebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
-    if( pscene == nullptr )
-        return;
-
+    if ( pscene )
+    {
     pscene->setViewport(width, height);
-    pgui->setViewport(width, height);
+    }
+
+    if ( pgui )
+    {
+        pgui->setViewport(width, height);
+    }
 }
 
 void TWindow::displayUsage()
@@ -382,37 +394,78 @@ void TWindow::displayUsage()
     std::cout << " *********************************************** " << std::endl;
 }
 
+void TWindow::renderScene()
+{
+    if ( pscene )
+    {
+        pscene->render();
+    }
+}
+
+void TWindow::renderGui()
+{
+    if ( pgui )
+    {
+        pgui->render();
+    }
+}
+
+void TWindow::registerCallbacks()
+{
+    glfwSetKeyCallback(main_window, keyCallback); 
+    glfwSetMouseButtonCallback(main_window, mouseButtonCallback); 
+    glfwSetCursorPosCallback(main_window, cursorPosCallback); 
+    glfwSetScrollCallback(main_window, scrollCallback); 
+    glfwSetFramebufferSizeCallback(main_window, framebufferSizeCallback);
+}
+
+void TWindow::makeContextCurrent()
+{
+    glfwMakeContextCurrent(main_window);
+}
+
+void TWindow::swapBuffers()
+{
+    glfwSwapBuffers( main_window );
+}
+
+void TWindow::poolEvents()
+{
+    glfwPollEvents();
+}
+
+bool TWindow::shouldClose()
+{
+    return glfwWindowShouldClose(main_window);
+}
+
 int TWindow::run()
 {
     initializeGui(pdata_.get());
 
     glEnable(GL_MULTISAMPLE);
 
-    glfwSetKeyCallback(main_window, keyCallback); 
-    glfwSetMouseButtonCallback(main_window, mouseButtonCallback); 
-    glfwSetCursorPosCallback(main_window, cursorPosCallback); 
-    glfwSetScrollCallback(main_window, scrollCallback); 
-    glfwSetFramebufferSizeCallback(main_window, framebufferSizeCallback);
+    registerCallbacks();
+
     glfwSetInputMode(main_window, GLFW_STICKY_KEYS, true);
 
-    if( pscene != nullptr )
-    {
-        pscene->render();
-        pgui->render();
-    }
-    glfwSwapBuffers( main_window );
+    renderScene();
+    renderGui();
+    /* glfwSwapBuffers( main_window ); */
+    swapBuffers();
 
-    while (!glfwWindowShouldClose(main_window))
+    /* while (!glfwWindowShouldClose(main_window)) */
+    while( !shouldClose() )
     {
-        glfwMakeContextCurrent(main_window);
-        if( pscene != nullptr )
-        {
-            pscene->render();
-            pgui->render();
-        }
-        glfwSwapBuffers( main_window );
+        /* glfwMakeContextCurrent(main_window); */
+        makeContextCurrent();
+        renderScene();
+        renderGui();
+        /* glfwSwapBuffers( main_window ); */
+        swapBuffers();
 
-        glfwPollEvents();
+        /* glfwPollEvents(); */
+        poolEvents();
     }
 
     glDisable(GL_MULTISAMPLE);
