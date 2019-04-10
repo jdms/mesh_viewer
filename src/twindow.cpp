@@ -368,7 +368,7 @@ void TWindow::framebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
     if ( pscene )
     {
-    pscene->setViewport(width, height);
+        pscene->setViewport(width, height);
     }
 
     if ( pgui )
