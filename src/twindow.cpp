@@ -10,7 +10,7 @@
 #include "twindow.hpp"
 #include "widget_data.hpp"
 #include "tucanow/scene.hpp"
-#include "tucanow/gui.hpp"
+#include "tucanow/phong_gui.hpp"
 #include "tucanow/misc.hpp"
 
 
@@ -210,7 +210,7 @@ void TWindow::initializeScene(WidgetData *data)
     tucanow::misc::initGlew();
 
     pscene.reset( new tucanow::Scene() );
-    pgui.reset( new tucanow::Gui( *pscene ) );
+    pgui = std::make_unique<tucanow::PhongGui>( *pscene );
 
     pscene->initialize(data->scene_width_, data->scene_height_);
 }
