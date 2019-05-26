@@ -28,24 +28,12 @@ namespace tucanow {
 // isGuiEnabled() should return false as well
 //
 //
-// Add methods to register new callbacks. 
-//-----------------------------------------
-//
-// This is more useful for setting new keyboard mappings.  Also, is it useful
-// to have a registerCallbacks() method or to just allow each individual
-// callback mapper to update its callbak with glfw?
-// 
-//
 // Think about the new fine grained control on glfw window
 //--------------------------------------------------------
 //
 // Also, have a  look at glfw docs for guidance.
 //
 //
-// Allow clients to properly set-up their own Guis (which must inherit from tucanow::Gui).
-//----------------------------------------------------------------------------------------
-//
-// 
 // Add method to call glfwSetWindowShouldClose(window, 1);    
 //--------------------------------------------------------
 //
@@ -75,7 +63,7 @@ class TWindow
         static TWindow* Get(int width, int height, std::string title = "tucanow::Scene Window");
 
         /// Destructor
-        ~TWindow();
+        virtual ~TWindow();
 
         /// Deleted default copy ctor
         TWindow(TWindow &) = delete;
@@ -92,19 +80,17 @@ class TWindow
         /// Display default usage info
         void displayUsage();
 
-        // TODO: this method seems redundant now
-        /// Path to dir with widget's assets (textures, icons, etc.)
-        bool setAssetsDir(std::string name);
-
         /// Get pointer to tucanow::Scene
         static tucanow::Scene* getScene();
 
         /// Get pointer to tucanow::Gui
         static tucanow::Gui* getGui();
 
-        /// Set new Gui, type TGui must derive from tucanow::Gui
-        template<typename TGui>
-        static TGui* setGui( std::string tgui_assets_dir = {} );
+        /// Get pointer to GLFWwindow
+        static GLFWwindow* getMainWindow();
+
+        /// Set new Gui (its type must derive from tucanow::Gui)
+        static void setGui( std::shared_ptr<tucanow::Gui> gui );
 
         /// Render scene
         void renderScene();
@@ -112,8 +98,23 @@ class TWindow
         /// Render gui if non-null
         void renderGui();
 
-        /// TODO: Implement --> Update glfw callbacks
-        void registerCallbacks();
+        /// set glfw3 key callback
+        static void setKeyCallback( void (*callback)(GLFWwindow* window, int key, int scancode, int action, int mods) );
+
+        /// set glfw3 mouse button callback
+        static void setMouseButtonCallback( void (*callback)(GLFWwindow* window, int button, int action, int mods) );
+
+        /// set glfw3 cursor position callback
+        static void setCursorPosCallback( void (*callback)(GLFWwindow* window, double xpos, double ypos) );
+
+        /// set glfw3 mouse wheel callback
+        static void setScrollCallback( void (*callback)(GLFWwindow* window, double xoffset, double yoffset) );
+
+        /// set glfw3 framebuffer resize callback
+        static void setFramebufferSizeCallback( void (*callback)(GLFWwindow *window, int width, int height) );
+
+        /// set glfw3 window content scale callback
+        static void setWindowContentScaleCallback( void (*callback)(GLFWwindow *window, float xscale, float yscale) );
 
         /// Make context current in glfw window
         void makeContextCurrent();
@@ -137,64 +138,47 @@ class TWindow
     protected:
         // Methods:
 
-        /// glfw3 callback
-        static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+        /// default glfw3 key callback
+        static void defaultKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
-        /// glfw3 callback
-        static void mouseButtonCallback (GLFWwindow* window, int button, int action, int mods);
+        /// default glfw3 mouse button callback
+        static void defaultMouseButtonCallback (GLFWwindow* window, int button, int action, int mods);
 
-        /// glfw3 callback
-        static void cursorPosCallback(GLFWwindow* window, double xpos, double ypos);
+        /// default glfw3 cursor callback
+        static void defaultCursorPosCallback(GLFWwindow* window, double xpos, double ypos);
 
-        /// glfw3 default mouse wheel callback
-        static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+        /// default glfw3 mouse wheel callback
+        static void defaultScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
-        /// glfw3 default framebuffer resize callback
-        static void framebufferSizeCallback(GLFWwindow *window, int width, int height);
+        /// default glfw3 framebuffer resize callback
+        static void defaultFramebufferSizeCallback(GLFWwindow *window, int width, int height);
+
+        /// default glfw3 window content scale callback
+        static void defaultWindowContentScaleCallback(GLFWwindow *window, float xscale, float yscale);
 
 
         // Members:
 
-        static std::unique_ptr<tucanow::Scene> pscene; ///< Holds a tucanow::Scene, must be initialized after glew
-        static std::unique_ptr<tucanow::Gui> pgui; ///< Holds a tucanow::Gui
+        static std::shared_ptr<tucanow::Scene> pscene; ///< Holds a tucanow::Scene, must be initialized after glew
 
-    private: 
-        static std::unique_ptr<WidgetData> pdata_; /// TWindow internal data
+        static std::shared_ptr<tucanow::Gui> pgui; ///< Holds a tucanow::Gui
 
         static GLFWwindow* main_window; ///< Points to memory managed by glfw3
 
 
-        /// Initialize tucanow::Scene (call glew)
-        static void initializeScene( WidgetData* data );
+    private: 
+        /* static std::unique_ptr<WidgetData> pdata_; /// TWindow internal data */
+
+
+        /* /// Initialize tucanow::Scene (call glew) */
+        /* static void initializeScene( WidgetData* data ); */
 
         /// Initialize tucanow::Gui
-        static void initializeGui( WidgetData* data );
+        /* static void initializeGui( WidgetData* data ); */
 
         /// Private ctor for singleton pattern
         TWindow();
 };
 
-
-template<typename TGui>
-TGui* TWindow::setGui(std::string tgui_assets_dir)
-{
-    if ( std::is_convertible<TGui*, tucanow::Gui*>::value )
-    {
-        if ( tgui_assets_dir.empty() )
-        {
-            pgui.reset( std::make_unique<TGui>() );
-        }
-        else
-        {
-            pgui.reset( std::make_unique<TGui>(tgui_assets_dir) );
-        }
-    }
-    else
-    {
-        pgui.reset(nullptr);
-    }
-
-    return pgui.get();
-}
 
 #endif

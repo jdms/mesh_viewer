@@ -15,9 +15,9 @@
 
 
 GLFWwindow* TWindow::main_window = nullptr;
-std::unique_ptr<tucanow::Scene> TWindow::pscene = nullptr;
-std::unique_ptr<tucanow::Gui> TWindow::pgui = nullptr;
-std::unique_ptr<WidgetData> TWindow::pdata_ = nullptr;
+std::shared_ptr<tucanow::Scene> TWindow::pscene = nullptr;
+std::shared_ptr<tucanow::Gui> TWindow::pgui = nullptr;
+/* std::unique_ptr<WidgetData> TWindow::pdata_ = nullptr; */
 
 
 TWindow::TWindow() = default;
@@ -54,7 +54,7 @@ TWindow* TWindow::Get(int width, int height, std::string title)
 #endif
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_SAMPLES, 8);
+    glfwWindowHint(GLFW_SAMPLES, 4);
 
     main_window = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
     if (main_window == nullptr)
@@ -79,31 +79,64 @@ TWindow* TWindow::Get(int width, int height, std::string title)
     glGetIntegerv(GL_SAMPLES, &samples);
     std::cout << "--> MSAA: buffers = " << bufs << ", samples = " << samples << std::endl;
 
-    // macOS highdpi mode creates a framebuffer that differs from the window size
-    int fb_width = 0;
-    int fb_height = 0;
-    glfwGetFramebufferSize( main_window, &fb_width, &fb_height );
-
+    setKeyCallback(defaultKeyCallback); 
+    setMouseButtonCallback(defaultMouseButtonCallback); 
+    setCursorPosCallback(defaultCursorPosCallback); 
+    setScrollCallback(defaultScrollCallback); 
+    setFramebufferSizeCallback(defaultFramebufferSizeCallback);
+    setWindowContentScaleCallback(defaultWindowContentScaleCallback);
 
     /////////////////////////////////////////////////////////////////
     // Initialize tucanow::Scene
     /////////////////////////////////////////////////////////////////
 
     // TODO: tidy up use of pointers
-    pdata_.reset( new WidgetData() );
+    /* pdata_.reset( new WidgetData() ); */
 
-    pdata_->scene_width_ = fb_width;
-    pdata_->scene_height_= fb_height;
-    initializeScene(pdata_.get());
+    /* pdata_->scene_width_ = fb_width; */
+    /* pdata_->scene_height_= fb_height; */
+    /* initializeScene(pdata_.get()); */
 
-    if ( pscene != nullptr )
-        if ( (fb_width > 0) && (fb_height > 0) )
-        {
-            pscene->setScreenScale( 
-                    static_cast<float>(fb_width)/static_cast<float>(width), 
-                    static_cast<float>(fb_height)/static_cast<float>(height) 
-                    );
-        }
+    /* Glew must be initialized before any tucanow object is created */
+    tucanow::misc::initGlew();
+
+    // macOS HighDpi mode creates a framebuffer that differs from the window size
+    // https://www.glfw.org/docs/latest/window.html#window_fbsize
+    int fb_width = 0;
+    int fb_height = 0;
+    glfwGetFramebufferSize( main_window, &fb_width, &fb_height );
+
+    // keep track of the window/framebuffer ratio (for when using HighDPI monitors)
+    // https://www.glfw.org/docs/latest/window.html#window_scale
+    float xscale, yscale;
+    glfwGetWindowContentScale(main_window, &xscale, &yscale);
+
+    pscene = std::make_shared<tucanow::Scene>();
+    if ( pscene == nullptr )
+    {
+        std::cerr << "Failed to create the tucanow::Scene" << std::endl;
+        glfwTerminate();
+        return nullptr;
+    }
+    // TODO: change tucanow::Scene::initialize() into a factory method
+    pscene->initialize(fb_width, fb_height);
+    pscene->setScreenScale( xscale, yscale );
+
+    pgui = tucanow::PhongGui::Get( *pscene );
+
+    /* if ( pscene != nullptr ) */
+        /* if ( (fb_width > 0) && (fb_height > 0) ) */
+        /* { */
+            /* pscene->setScreenScale( */ 
+                    /* static_cast<float>(fb_width)/static_cast<float>(width), */ 
+                    /* static_cast<float>(fb_height)/static_cast<float>(height) */ 
+                    /* ); */
+        /* } */
+
+    /* pscene->getScreenScale( xscale, yscale ); */
+    /* std::cout << "scene xscale: " << xscale << ", scene yscale: " << yscale << std::endl << std::flush; */ 
+    /* glfwGetWindowContentScale(main_window, &xscale, &yscale); */
+    /* std::cout << "glfw xscale: " << xscale << ", glfw yscale: " << yscale << std::endl << std::flush; */ 
 
 
     /////////////////////////////////////////////////////////////////
@@ -182,17 +215,21 @@ TWindow* TWindow::Get(int width, int height, std::string title)
 /*     return pscene->loadPLY(object_id, filename); */
 /* } */
 
-bool TWindow::setAssetsDir(std::string dirname)
-{
-    if ( dirname.empty() )
-    {
-        return false;
-    }
+/* // TODO: this method seems redundant now */
+/* /// Path to dir with widget's assets (textures, icons, etc.) */
+/* bool setAssetsDir(std::string name); */
 
-    pdata_->assets_dir_ = dirname;
+/* bool TWindow::setAssetsDir(std::string dirname) */
+/* { */
+/*     if ( dirname.empty() ) */
+/*     { */
+/*         return false; */
+/*     } */
 
-    return true;
-}
+/*     pdata_->assets_dir_ = dirname; */
+
+/*     return true; */
+/* } */
 
 tucanow::Scene* TWindow::getScene()
 {
@@ -204,24 +241,34 @@ tucanow::Gui* TWindow::getGui()
     return pgui.get();
 }
 
-void TWindow::initializeScene(WidgetData *data)
+GLFWwindow* TWindow::getMainWindow()
 {
-    /* Glew must be initialized before any tucanow object is created */
-    tucanow::misc::initGlew();
-
-    pscene.reset( new tucanow::Scene() );
-    pgui = std::make_unique<tucanow::PhongGui>( *pscene );
-
-    pscene->initialize(data->scene_width_, data->scene_height_);
+    return main_window;
 }
 
-void TWindow::initializeGui(WidgetData *data)
+void TWindow::setGui( std::shared_ptr<tucanow::Gui> gui )
 {
-    if ( pgui )
-        pgui->initialize(data->scene_width_, data->scene_width_, data->assets_dir_);
+    pgui = gui;
 }
 
-void TWindow::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+/* void TWindow::initializeScene(WidgetData *data) */
+/* { */
+/*     /1* Glew must be initialized before any tucanow object is created *1/ */
+/*     tucanow::misc::initGlew(); */
+
+/*     pscene = std::make_shared<tucanow::Scene>(); */
+/*     pgui = std::make_shared<tucanow::PhongGui>( *pscene ); */
+
+/*     pscene->initialize(data->scene_width_, data->scene_height_); */
+/* } */
+
+/* void TWindow::initializeGui(WidgetData *data) */
+/* { */
+/*     if ( pgui ) */
+/*         pgui->initialize(data->scene_width_, data->scene_width_, data->assets_dir_); */
+/* } */
+
+void TWindow::defaultKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, 1);    
@@ -245,7 +292,7 @@ void TWindow::keyCallback(GLFWwindow* window, int key, int scancode, int action,
     }
 }
 
-void TWindow::mouseButtonCallback (GLFWwindow* window, int button, int action, int mods)
+void TWindow::defaultMouseButtonCallback (GLFWwindow* window, int button, int action, int mods)
 {
     if( !pscene )
         return;
@@ -310,7 +357,7 @@ void TWindow::mouseButtonCallback (GLFWwindow* window, int button, int action, i
     }
 }
 
-void TWindow::cursorPosCallback(GLFWwindow* window, double xpos, double ypos)
+void TWindow::defaultCursorPosCallback(GLFWwindow* window, double xpos, double ypos)
 {
     if( !pscene )
     {
@@ -347,7 +394,7 @@ void TWindow::cursorPosCallback(GLFWwindow* window, double xpos, double ypos)
 
 }
 
-void TWindow::scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+void TWindow::defaultScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
     if( !pscene )
     {
@@ -364,7 +411,7 @@ void TWindow::scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
     }
 }
 
-void TWindow::framebufferSizeCallback(GLFWwindow* window, int width, int height)
+void TWindow::defaultFramebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
     if ( pscene )
     {
@@ -375,6 +422,12 @@ void TWindow::framebufferSizeCallback(GLFWwindow* window, int width, int height)
     {
         pgui->setViewport(width, height);
     }
+}
+
+void TWindow::defaultWindowContentScaleCallback(GLFWwindow *window, float xscale, float yscale)
+{
+    if ( pscene )
+        pscene->setScreenScale(xscale, yscale);
 }
 
 void TWindow::displayUsage()
@@ -410,13 +463,49 @@ void TWindow::renderGui()
     }
 }
 
-void TWindow::registerCallbacks()
+/* void TWindow::registerCallbacks() */
+/* { */
+/*     glfwSetKeyCallback(main_window, keyCallback); */ 
+/*     glfwSetMouseButtonCallback(main_window, mouseButtonCallback); */ 
+/*     glfwSetCursorPosCallback(main_window, cursorPosCallback); */ 
+/*     glfwSetScrollCallback(main_window, scrollCallback); */ 
+/*     glfwSetFramebufferSizeCallback(main_window, framebufferSizeCallback); */
+/* } */
+
+/// set glfw3 key callback
+void TWindow::setKeyCallback( void (*callback)(GLFWwindow* window, int key, int scancode, int action, int mods) )
 {
-    glfwSetKeyCallback(main_window, keyCallback); 
-    glfwSetMouseButtonCallback(main_window, mouseButtonCallback); 
-    glfwSetCursorPosCallback(main_window, cursorPosCallback); 
-    glfwSetScrollCallback(main_window, scrollCallback); 
-    glfwSetFramebufferSizeCallback(main_window, framebufferSizeCallback);
+    glfwSetKeyCallback(main_window, callback); 
+}
+
+/// set glfw3 mouse button callback
+void TWindow::setMouseButtonCallback( void (*callback)(GLFWwindow* window, int button, int action, int mods) )
+{
+    glfwSetMouseButtonCallback(main_window, callback); 
+}
+
+/// set glfw3 cursor position callback
+void TWindow::setCursorPosCallback( void (*callback)(GLFWwindow* window, double xpos, double ypos) )
+{
+    glfwSetCursorPosCallback(main_window, callback); 
+}
+
+/// set glfw3 mouse wheel callback
+void TWindow::setScrollCallback( void (*callback)(GLFWwindow* window, double xoffset, double yoffset) )
+{
+    glfwSetScrollCallback(main_window, callback); 
+}
+
+/// set glfw3 framebuffer resize callback
+void TWindow::setFramebufferSizeCallback( void (*callback)(GLFWwindow *window, int width, int height) )
+{
+    glfwSetFramebufferSizeCallback(main_window, callback);
+}
+
+/// set glfw3 window content scale callback
+void TWindow::setWindowContentScaleCallback( void (*callback)(GLFWwindow *window, float xscale, float yscale) )
+{
+    glfwSetWindowContentScaleCallback(main_window, callback);
 }
 
 void TWindow::makeContextCurrent()
@@ -441,11 +530,11 @@ bool TWindow::shouldClose()
 
 int TWindow::run()
 {
-    initializeGui(pdata_.get());
+    /* initializeGui(pdata_.get()); */
 
     glEnable(GL_MULTISAMPLE);
 
-    registerCallbacks();
+    /* registerCallbacks(); */
 
     glfwSetInputMode(main_window, GLFW_STICKY_KEYS, true);
 

@@ -14,7 +14,7 @@ int main()
     std::string window_title = "A Simple Mesh Viewer";
 
     auto main_window = TWindow::Get(window_width, window_height, window_title);
-    main_window->setAssetsDir("./samples/assets/");
+    /* main_window->setAssetsDir("./samples/assets/"); */
 
 
     // Set meshes to be visualized
