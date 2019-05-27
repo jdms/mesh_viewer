@@ -13,7 +13,8 @@ int main()
     const int window_height = 800;
     std::string window_title = "A Simple Mesh Viewer";
 
-    auto main_window = TWindow::Get(window_width, window_height, window_title);
+    auto main_window = TWindow::Get(window_width, window_height);
+    main_window->setTitle(window_title);
     /* main_window->setAssetsDir("./samples/assets/"); */
 
 

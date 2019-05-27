@@ -59,7 +59,7 @@ namespace tucanow {
 class TWindow
 {
     public:
-        /// TWindow is a singleton, returns nullptr if fails
+        /// Get pointer to TWindow (singleton), returns nullptr in case of failure
         static TWindow* Get(int width, int height, std::string title = "tucanow::Scene Window");
 
         /// Destructor
@@ -77,6 +77,9 @@ class TWindow
         /// Deleted default move assigment
         TWindow& operator=(TWindow &&) = delete;
 
+        /// Set window title
+        bool setTitle( const std::string &title );
+
         /// Display default usage info
         void displayUsage();
 
@@ -87,7 +90,7 @@ class TWindow
         static tucanow::Gui* getGui();
 
         /// Get pointer to GLFWwindow
-        static GLFWwindow* getMainWindow();
+        static GLFWwindow* getGLFWwindow();
 
         /// Set new Gui (its type must derive from tucanow::Gui)
         static void setGui( std::shared_ptr<tucanow::Gui> gui );
@@ -159,7 +162,7 @@ class TWindow
 
         // Members:
 
-        static std::shared_ptr<tucanow::Scene> pscene; ///< Holds a tucanow::Scene, must be initialized after glew
+        static std::shared_ptr<tucanow::Scene> pscene; ///< Holds a tucanow::Scene
 
         static std::shared_ptr<tucanow::Gui> pgui; ///< Holds a tucanow::Gui
 
