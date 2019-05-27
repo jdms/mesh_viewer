@@ -85,6 +85,10 @@ add_executable(main_spheres
 
 target_link_libraries(main_spheres twindow)
 
+if ($GLFW3_VERSION VERSION_GREATER_EQUAL 3.3)
+    target_compile_options(twindow PRIVATE -DTWINDOW_GLFW3_VERSION_3_3_OR_GREATER)
+endif()
+
 add_executable(main_ply
     ${CMAKE_SOURCE_DIR}/src/main_ply.cpp
 )

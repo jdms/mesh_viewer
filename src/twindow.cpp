@@ -113,8 +113,17 @@ TWindow* TWindow::Get(int width, int height, std::string title)
 
         // keep track of the window/framebuffer ratio (for when using HighDPI monitors)
         // https://www.glfw.org/docs/latest/window.html#window_scale
-        float xscale, yscale;
-        glfwGetWindowContentScale(main_window, &xscale, &yscale);
+        float xscale = 1.0f, yscale = 1.0f;
+
+        #if defined(TWINDOW_GLFW3_VERSION_3_3_OR_GREATER)
+            glfwGetWindowContentScale(main_window, &xscale, &yscale);
+        #else
+            if ( (fb_width > 0) && (fb_height > 0) )
+            {
+                xscale = static_cast<float>(fb_width)/static_cast<float>(width);
+                yscale = static_cast<float>(fb_height)/static_cast<float>(height);
+            }
+        #endif
 
         pscene = std::make_shared<tucanow::Scene>();
         if ( pscene == nullptr )
@@ -530,7 +539,9 @@ void TWindow::setFramebufferSizeCallback( void (*callback)(GLFWwindow *window, i
 /// set glfw3 window content scale callback
 void TWindow::setWindowContentScaleCallback( void (*callback)(GLFWwindow *window, float xscale, float yscale) )
 {
-    glfwSetWindowContentScaleCallback(main_window, callback);
+    #if defined(TWINDOW_GLFW3_VERSION_3_3_OR_GREATER)
+        glfwSetWindowContentScaleCallback(main_window, callback);
+    #endif
 }
 
 void TWindow::makeContextCurrent()
