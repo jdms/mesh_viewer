@@ -39,9 +39,10 @@ else()
     # As per its docs, glfw3 requires the use of 
     # pkg-config (see `man pkg-config`)
 
-    find_package(PkgConfig REQUIRED)
+    # find_package(PkgConfig REQUIRED)
+    find_package(glfw3 REQUIRED)
 
-    pkg_search_module(GLFW REQUIRED glfw3)
+    # pkg_search_module(GLFW REQUIRED glfw3)
     # include_directories(${GLFW_INCLUDE_DIRS})
 
     # What do we have, static or dynamic libraries?
@@ -76,7 +77,7 @@ target_link_libraries(twindow
     PUBLIC 
         tucanow
     PRIVATE
-        ${GLFW_LIBRARIES}
+        glfw
 )
 
 add_executable(main_spheres
@@ -85,8 +86,9 @@ add_executable(main_spheres
 
 target_link_libraries(main_spheres twindow)
 
-if ($GLFW3_VERSION VERSION_GREATER_EQUAL 3.3)
+if (glfw3_VERSION VERSION_GREATER_EQUAL 3.3)
     target_compile_options(twindow PRIVATE -DTWINDOW_GLFW3_VERSION_3_3_OR_GREATER)
+    message(STATUS "Enabling glfw3 native window content scaling")
 endif()
 
 add_executable(main_ply

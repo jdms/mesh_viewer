@@ -82,7 +82,6 @@ TWindow* TWindow::Get(int width, int height, std::string title)
         glGetIntegerv(GL_SAMPLE_BUFFERS, &bufs);
         glGetIntegerv(GL_SAMPLES, &samples);
         std::cout << "--> MSAA: buffers = " << bufs << ", samples = " << samples << std::endl;
-        std::cout << std::endl;
 
         setKeyCallback(defaultKeyCallback); 
         setMouseButtonCallback(defaultMouseButtonCallback); 
@@ -117,12 +116,14 @@ TWindow* TWindow::Get(int width, int height, std::string title)
 
         #if defined(TWINDOW_GLFW3_VERSION_3_3_OR_GREATER)
             glfwGetWindowContentScale(main_window, &xscale, &yscale);
+            std::cout << "--> Managed (glfw) content scale: xscale = " << xscale << ", yscale = " << yscale << std::endl;
         #else
             if ( (fb_width > 0) && (fb_height > 0) )
             {
                 xscale = static_cast<float>(fb_width)/static_cast<float>(width);
                 yscale = static_cast<float>(fb_height)/static_cast<float>(height);
             }
+            std::cout << "--> Computed (fixed) content scale: xscale = " << xscale << ", yscale = " << yscale << std::endl;
         #endif
 
         pscene = std::make_shared<tucanow::Scene>();
@@ -448,6 +449,7 @@ void TWindow::defaultFramebufferSizeCallback(GLFWwindow* window, int width, int 
 
 void TWindow::defaultWindowContentScaleCallback(GLFWwindow *window, float xscale, float yscale)
 {
+    std::cout << "--> Managed (glfw) content scale: xscale = " << xscale << ", yscale = " << yscale << std::endl;
     if ( pscene )
         pscene->setScreenScale(xscale, yscale);
 }
@@ -479,6 +481,7 @@ void TWindow::displayUsage()
     std::cout << " H : alternate between headlight and fixed light " << std::endl;
     std::cout << " R : reset trackball and light direction"          << std::endl;
     std::cout << " *********************************************** " << std::endl;
+    std::cout << std::endl;
 }
 
 void TWindow::renderScene()
@@ -540,6 +543,7 @@ void TWindow::setFramebufferSizeCallback( void (*callback)(GLFWwindow *window, i
 void TWindow::setWindowContentScaleCallback( void (*callback)(GLFWwindow *window, float xscale, float yscale) )
 {
     #if defined(TWINDOW_GLFW3_VERSION_3_3_OR_GREATER)
+        std::cout << "--> Using glfw3 native window content scaling" << std::endl;
         glfwSetWindowContentScaleCallback(main_window, callback);
     #endif
 }
