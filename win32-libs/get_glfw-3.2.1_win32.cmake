@@ -77,12 +77,12 @@ macro(GetGLFW3)
     # Create library interface
     ###############################################
 
-    if (NOT TARGET GLFW) 
-        add_library(GLFW INTERFACE)
-        target_include_directories(GLFW INTERFACE ${GLFW_INCLUDE_DIRS})
-        target_link_libraries(GLFW INTERFACE ${GLFW_LIBRARIES})
+    if (NOT TARGET glfw) 
+        add_library(glfw INTERFACE)
+        target_include_directories(glfw INTERFACE ${GLFW_INCLUDE_DIRS})
+        target_link_libraries(glfw INTERFACE ${GLFW_LIBRARIES})
 
-        add_library(GLFW::GLFW ALIAS GLFW)
+        add_library(glfw::glfw3 ALIAS glfw)
     endif()
 
 

@@ -68,6 +68,9 @@ macro(GetGLFW3)
     if (GLFW_LIBRARIES)
         message(STATUS "Found GLFW library: ${GLFW_LIBRARIES}")
         message(STATUS "Found GLFW runtime: ${GLFW_RUNTIME}")
+        set(glfw_VERSION "3.3" PARENT_SCOPE)
+        set(glfw_VERSION_MAJOR "3" PARENT_SCOPE)
+        set(glfw_VERSION_MINOR "3" PARENT_SCOPE)
     else()
         message(FATAL_ERROR "Could not find GLFW library -- abort")
     endif()
@@ -77,12 +80,12 @@ macro(GetGLFW3)
     # Create library interface
     ###############################################
 
-    if (NOT TARGET GLFW) 
-        add_library(GLFW INTERFACE)
-        target_include_directories(GLFW INTERFACE ${GLFW_INCLUDE_DIRS})
-        target_link_libraries(GLFW INTERFACE ${GLFW_LIBRARIES})
+    if (NOT TARGET glfw) 
+        add_library(glfw INTERFACE)
+        target_include_directories(glfw INTERFACE ${GLFW_INCLUDE_DIRS})
+        target_link_libraries(glfw INTERFACE ${GLFW_LIBRARIES})
 
-        add_library(GLFW::GLFW ALIAS GLFW)
+        add_library(glfw::glfw3 ALIAS glfw)
     endif()
 
 
