@@ -42,6 +42,8 @@ else()
     # find_package(PkgConfig REQUIRED)
     find_package(glfw3 REQUIRED)
 
+    find_package(glog REQUIRED)
+
     # pkg_search_module(GLFW REQUIRED glfw3)
     # include_directories(${GLFW_INCLUDE_DIRS})
 
@@ -78,6 +80,7 @@ target_link_libraries(twindow
         tucanow
     PRIVATE
         glfw
+        glog
 )
 
 add_executable(main_spheres
