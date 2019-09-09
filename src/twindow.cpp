@@ -1,3 +1,5 @@
+#include "twindow.hpp"
+
 #include <iostream>
 
 // Add missing OpenGL extensions in Windows
@@ -7,7 +9,8 @@
 
 #include "GLFW/glfw3.h"
 
-#include "twindow.hpp"
+#include "glog/logging.h"
+
 #include "widget_data.hpp"
 #include "tucanow/scene.hpp"
 #include "tucanow/phong_gui.hpp"
@@ -34,6 +37,10 @@ TWindow* TWindow::Get(int width, int height, std::string title)
 
     if ( !already_initialized )
     {
+        /////////////////////////////////////////////////////////////////
+        // Check arguments
+        /////////////////////////////////////////////////////////////////
+ 
         if ( (width < 1) || (height < 1) )
         {
             return nullptr;
@@ -46,7 +53,8 @@ TWindow* TWindow::Get(int width, int height, std::string title)
 
         if (!glfwInit()) 
         {
-            std::cerr << "Failed to init glfw" << std::endl;
+            /* std::cerr << "--> Failed to init glfw" << std::endl; */
+            LOG(ERROR) << "Failed to init glfw";
             return nullptr;
         }
 
@@ -63,25 +71,29 @@ TWindow* TWindow::Get(int width, int height, std::string title)
         main_window = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
         if (main_window == nullptr)
         {
-            std::cerr << "Failed to create the GLFW window" << std::endl;
+            /* std::cerr << "--> Failed to create the GLFW window" << std::endl; */
+            LOG(ERROR) << "Failed to create the GLFW window";
             glfwTerminate();
             return nullptr;
         }
 
         glfwMakeContextCurrent(main_window);
 
-        std::cout << std::endl;
-        std::cout << "*** Diagnostics:" << std::endl;
+        /* std::cout << std::endl; */
+        /* std::cout << "*** Diagnostics:" << std::endl; */
 
         const GLubyte* openGLRenderer = glGetString(GL_RENDERER);
         const GLubyte* openGLVersion = glGetString(GL_VERSION);
-        std::cout << "--> Renderer: " << openGLRenderer << std::endl;
-        std::cout << "--> OpenGL version in use: " << openGLVersion << std::endl;
+        /* std::cout << "--> Renderer: " << openGLRenderer << std::endl; */
+        LOG(INFO) << "Renderer: " << openGLRenderer;
+        /* std::cout << "--> OpenGL version in use: " << openGLVersion << std::endl; */
+        LOG(INFO) << "OpenGL version in use: " << openGLVersion;
 
         GLint bufs, samples;
         glGetIntegerv(GL_SAMPLE_BUFFERS, &bufs);
         glGetIntegerv(GL_SAMPLES, &samples);
-        std::cout << "--> MSAA: buffers = " << bufs << ", samples = " << samples << std::endl;
+        /* std::cout << "--> MSAA: buffers = " << bufs << ", samples = " << samples << std::endl; */
+        LOG(INFO) << "MSAA: buffers = " << bufs << ", samples = " << samples;
 
         setKeyCallback(defaultKeyCallback); 
         setMouseButtonCallback(defaultMouseButtonCallback); 
@@ -116,20 +128,23 @@ TWindow* TWindow::Get(int width, int height, std::string title)
 
         #if defined(TWINDOW_GLFW3_VERSION_3_3_OR_GREATER)
             glfwGetWindowContentScale(main_window, &xscale, &yscale);
-            std::cout << "--> Managed (glfw) content scale: xscale = " << xscale << ", yscale = " << yscale << std::endl;
+            /* std::cout << "--> Managed (glfw) content scale: xscale = " << xscale << ", yscale = " << yscale << std::endl; */
+            LOG(INFO) << "Managed (glfw) content scale: xscale = " << xscale << ", yscale = " << yscale;
         #else
             if ( (fb_width > 0) && (fb_height > 0) )
             {
                 xscale = static_cast<float>(fb_width)/static_cast<float>(width);
                 yscale = static_cast<float>(fb_height)/static_cast<float>(height);
             }
-            std::cout << "--> Computed (fixed) content scale: xscale = " << xscale << ", yscale = " << yscale << std::endl;
+            /* std::cout << "--> Computed (fixed) content scale: xscale = " << xscale << ", yscale = " << yscale << std::endl; */
+            LOG(INFO) << "Computed (fixed) content scale: xscale = " << xscale << ", yscale = " << yscale;
         #endif
 
         pscene = std::make_shared<tucanow::Scene>();
         if ( pscene == nullptr )
         {
-            std::cerr << "Failed to create the tucanow::Scene" << std::endl;
+            /* std::cerr << "--> Failed to create the tucanow::Scene" << std::endl; */
+            LOG(ERROR) << "Failed to create the tucanow::Scene";
             glfwTerminate();
             return nullptr;
         }
@@ -153,6 +168,11 @@ TWindow* TWindow::Get(int width, int height, std::string title)
         /* glfwGetWindowContentScale(main_window, &xscale, &yscale); */
         /* std::cout << "glfw xscale: " << xscale << ", glfw yscale: " << yscale << std::endl << std::flush; */ 
 
+
+        /////////////////////////////////////////////////////////////////
+        // All set
+        /////////////////////////////////////////////////////////////////
+        
         already_initialized = true;
     }
 
@@ -449,7 +469,8 @@ void TWindow::defaultFramebufferSizeCallback(GLFWwindow* window, int width, int 
 
 void TWindow::defaultWindowContentScaleCallback(GLFWwindow *window, float xscale, float yscale)
 {
-    std::cout << "--> Managed (glfw) content scale: xscale = " << xscale << ", yscale = " << yscale << std::endl;
+    /* std::cout << "--> Managed (glfw) content scale: xscale = " << xscale << ", yscale = " << yscale << std::endl; */
+    LOG(INFO) << "Managed (glfw) content scale: xscale = " << xscale << ", yscale = " << yscale << std::endl;
     if ( pscene )
         pscene->setScreenScale(xscale, yscale);
 }
@@ -543,7 +564,8 @@ void TWindow::setFramebufferSizeCallback( void (*callback)(GLFWwindow *window, i
 void TWindow::setWindowContentScaleCallback( void (*callback)(GLFWwindow *window, float xscale, float yscale) )
 {
     #if defined(TWINDOW_GLFW3_VERSION_3_3_OR_GREATER)
-        std::cout << "--> Using glfw3 native window content scaling" << std::endl;
+        /* std::cout << "--> Using glfw3 native window content scaling" << std::endl; */
+        LOG(INFO) << "Using glfw3 native window content scaling" << std::endl;
         glfwSetWindowContentScaleCallback(main_window, callback);
     #endif
 }

@@ -1,13 +1,21 @@
 #include <string>
 #include <vector>
 
+#include <glog/logging.h>
+
 #include "twindow.hpp"
 #include "tucanow/scene.hpp"
 #include "tucanow/sphere.hpp"
 
 
-int main()
+int main(int, char** argv)
 {
+    // Initialize google::glog
+    FLAGS_logtostderr = true;
+    FLAGS_colorlogtostderr = true;
+    FLAGS_log_dir = ".";
+    google::InitGoogleLogging(argv[0]);
+ 
     // Create main window
     const int window_width = 800;
     const int window_height = 800;
