@@ -32,10 +32,10 @@ set_target_properties(tucanow PROPERTIES
 # Making glfw3 work is more fun!
 ###############################################
 
-if(WIN32)
-    add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/win32-libs")
+# if(WIN32)
+    # add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/win32-libs")
 
-else()
+# else()
     # As per its docs, glfw3 requires the use of 
     # pkg-config (see `man pkg-config`)
 
@@ -46,11 +46,11 @@ else()
     # include_directories(${GLFW_INCLUDE_DIRS})
 
     # What do we have, static or dynamic libraries?
-    if(NOT GLFW_LIBRARIES)
-        set(GLFW_LIBRARIES ${GLFW_STATIC_LIBRARIES})
-    endif()
+    # if(NOT GLFW_LIBRARIES)
+        # set(GLFW_LIBRARIES ${GLFW_STATIC_LIBRARIES})
+    # endif()
     # link_libraries(${GLFW_LIBRARIES})
-endif()
+# endif()
 
 
 ###############################################
@@ -69,8 +69,8 @@ target_compile_features(twindow PUBLIC cxx_std_11)
 target_include_directories(twindow 
     PUBLIC 
         "${CMAKE_SOURCE_DIR}/include"
-    PRIVATE 
-        "${GLFW_INCLUDE_DIRS}"
+    # PRIVATE 
+        # "${GLFW_INCLUDE_DIRS}"
 )
 
 target_link_libraries(twindow 
