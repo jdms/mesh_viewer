@@ -79,7 +79,7 @@ target_link_libraries(twindow
     PUBLIC 
         tucanow
         glfw
-        glog
+        glog::glog
 )
 
 add_executable(main_spheres
