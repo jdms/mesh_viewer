@@ -78,7 +78,6 @@ target_include_directories(twindow
 target_link_libraries(twindow 
     PUBLIC 
         tucanow
-    PRIVATE
         glfw
         glog
 )
