@@ -105,6 +105,6 @@ target_link_libraries(main_ply twindow)
 
 add_custom_command(TARGET twindow POST_BUILD 
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_SOURCE_DIR}/samples/models
-        ${CMAKE_CURRENT_BINARY_DIR}/samples/models
+    ${CMAKE_CURRENT_SOURCE_DIR}/samples/models
+    ${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR}/samples/models
 )
