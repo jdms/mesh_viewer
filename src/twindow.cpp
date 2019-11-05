@@ -324,10 +324,10 @@ void TWindow::defaultKeyCallback(GLFWwindow* window, int key, int scancode, int 
         pscene->toggleHeadlight();
     }
 
-    if (key == GLFW_KEY_W && action == GLFW_PRESS)
-    {
-        pscene->toggleRenderWireframe();
-    }
+    /* if (key == GLFW_KEY_W && action == GLFW_PRESS) */
+    /* { */
+    /*     pscene->toggleRenderWireframe(); */
+    /* } */
 }
 
 void TWindow::defaultMouseButtonCallback (GLFWwindow* window, int button, int action, int mods)

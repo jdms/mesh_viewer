@@ -50,6 +50,7 @@ int main(int, char** argv)
 
     scene->loadTriangleMesh(1, vertices1, triangles1, normals1);
     scene->setObjectColor(1, 1.0f, 0.f, 0.f);
+    scene->setObjectShader(1, tucanow::ObjectShader::OnePassWireframe);
 
     /* scene->loadPointCloud(2, vertices2); */
     scene->loadTriangleMesh(2, vertices2, triangles2, normals2);
