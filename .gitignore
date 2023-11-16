@@ -8,6 +8,7 @@ src/tucanow/.gitignore
 win32-libs/glfw*
 src/win32-libs/eigen*
 src/win32-libs/glew*
+.cache
 
 
 ###################
