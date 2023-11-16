@@ -31,7 +31,7 @@ TWindow::~TWindow()
     glfwTerminate();
 }
 
-TWindow* TWindow::Get(int width, int height, std::string title)
+std::shared_ptr<TWindow> TWindow::Get(int width, int height, std::string title)
 {
     static bool already_initialized = false;
 
@@ -180,9 +180,9 @@ TWindow* TWindow::Get(int width, int height, std::string title)
     /////////////////////////////////////////////////////////////////
     // Create singleton (based on Scott Meyers' singleton pattern)
     /////////////////////////////////////////////////////////////////
-    static TWindow single_instance;
+    static std::shared_ptr<TWindow> single_instance_ptr = std::shared_ptr<TWindow>(new TWindow());
 
-    return &single_instance;
+    return single_instance_ptr;
 }
 
 /* bool TWindow::setMesh( */

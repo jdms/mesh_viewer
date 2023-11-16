@@ -60,7 +60,7 @@ class TWindow
 {
     public:
         /// Get pointer to TWindow (singleton), returns nullptr in case of failure
-        static TWindow* Get(int width, int height, std::string title = "tucanow::Scene Window");
+        static std::shared_ptr<TWindow> Get(int width, int height, std::string title = "tucanow::Scene Window");
 
         /// Destructor
         virtual ~TWindow();
